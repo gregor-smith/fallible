@@ -12,29 +12,20 @@ export type Error<T> = { ok: false, value: T }
 export type Fallible<TOk, TError> = Ok<TOk> | Error<TError>
 
 
-export type FallibleArgs<TOk, TError> = {
-    ok: (value: TOk) => Fallible<TOk, TError>
-    error: (value: TError) => Fallible<TOk, TError>
-    propagate: <TReturn>(fallible: Fallible<TReturn, TError>) => TReturn
+export function propagate<TOk, TError>(fallible: Fallible<TOk, TError>): TOk {
+    if (!fallible.ok) {
+        throw new FallibleError(fallible.value)
+    }
+    return fallible.value
 }
 
-export type FallibleFunc<TOk, TError> = (args: FallibleArgs<TOk, TError>) => Fallible<TOk, TError>
 
 
 export function fallible<TOk, TError>(
-    func: FallibleFunc<TOk, TError>
+    func: () => Fallible<TOk, TError>
 ): Fallible<TOk, TError> {
     try {
-        return func({
-            ok,
-            error,
-            propagate: fallible => {
-                if (!fallible.ok) {
-                    throw new FallibleError(fallible.value)
-                }
-                return fallible.value
-            }
-        })
+        return func()
     }
     catch (exception: unknown) {
         if (exception instanceof FallibleError) {
@@ -45,29 +36,11 @@ export function fallible<TOk, TError>(
 }
 
 
-export type AsyncFallibleArgs<TOk, TError> = {
-    ok: (value: TOk) => Fallible<TOk, TError> | Promise<Fallible<TOk, TError>>
-    error: (value: TError) => Fallible<TOk, TError> | Promise<Fallible<TOk, TError>>
-    propagate: <TReturn>(fallible: Fallible<TReturn, TError>) => TReturn
-}
-
-export type AsyncFallibleFunc<TOk, TError> = (args: AsyncFallibleArgs<TOk, TError>) => Fallible<TOk, TError> | Promise<Fallible<TOk, TError>>
-
-
 export async function asyncFallible<TOk, TError>(
-    func: AsyncFallibleFunc<TOk, TError>
+    func: () => Fallible<TOk, TError> | Promise<Fallible<TOk, TError>>
 ): Promise<Fallible<TOk, TError>> {
     try {
-        return await func({
-            ok,
-            error,
-            propagate: fallible => {
-                if (!fallible.ok) {
-                    throw new FallibleError(fallible.value)
-                }
-                return fallible.value
-            }
-        })
+        return await func()
     }
     catch (exception: unknown) {
         if (exception instanceof FallibleError) {
