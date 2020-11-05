@@ -1,0 +1,22 @@
+{
+  "name": "fallible",
+  "version": "0.1.0",
+  "main": "dist/cjs-es5/index.js",
+  "module": "dist/esm-es6/index.js",
+  "types": "dist/cjs-es5/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gregor-smith/fallible.git"
+  },
+  "author": "Gregor Smith",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.0.5"
+  },
+  "dependencies": {
+  },
+  "scripts": {
+    "build-cjs": "tsc",
+    "build-esm": "tsc -p tsconfig.esm.json"
+  }
+}
