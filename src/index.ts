@@ -20,7 +20,6 @@ export function propagate<TOk, TError>(fallible: Fallible<TOk, TError>): TOk {
 }
 
 
-
 export function fallible<TOk, TError>(
     func: () => Fallible<TOk, TError>
 ): Fallible<TOk, TError> {
@@ -55,9 +54,11 @@ export function ok<T>(value: T): Ok<T> {
     return { ok: true, value }
 }
 
+
 export function error<T>(value: T): Error<T> {
     return { ok: false, value }
 }
+
 
 export function mapError<TOk, TError, TNewError>(
     func: (error: TError) => TNewError
