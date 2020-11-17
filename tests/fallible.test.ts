@@ -1,10 +1,10 @@
-import { fallible, error, ok, propagate, Fallible, asyncFallible, mapError } from '../src'
+import { fallible, error, ok, propagate, Result, asyncFallible, mapError } from '../src'
 
 
 
 type ParseJSONError = 'InvalidJSON'
 
-function parseJSON<T = unknown>(json: string): Fallible<T, ParseJSONError> {
+function parseJSON<T = unknown>(json: string): Result<T, ParseJSONError> {
     let value: T
     try {
         value = JSON.parse(json)
@@ -18,7 +18,7 @@ function parseJSON<T = unknown>(json: string): Fallible<T, ParseJSONError> {
 
 type ParseIntegerError = 'NotInteger'
 
-function parseInteger(value: string): Fallible<number, ParseIntegerError> {
+function parseInteger(value: string): Result<number, ParseIntegerError> {
     const number = Number(value)
     if (!Number.isSafeInteger(number)) {
         return error('NotInteger')
@@ -61,12 +61,12 @@ describe('fallible', () => {
 })
 
 
-function asyncParseJSON<T = unknown>(json: string): Promise<Fallible<T, ParseJSONError>> {
+function asyncParseJSON<T = unknown>(json: string): Promise<Result<T, ParseJSONError>> {
     return Promise.resolve(parseJSON(json))
 }
 
 
-function asyncParseInteger(value: string): Promise<Fallible<number, ParseIntegerError>> {
+function asyncParseInteger(value: string): Promise<Result<number, ParseIntegerError>> {
     return Promise.resolve(parseInteger(value))
 }
 
@@ -85,7 +85,6 @@ describe('asyncFallible', () => {
 
     test('first error propagates', async () => {
         const result = await asyncFallible<number, ParseError>(async () => {
-            debugger
             propagate(await asyncParseJSON<string>('{'))
             throw 'This should be unreachable'
         })
