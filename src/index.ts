@@ -35,8 +35,11 @@ export function fallible<TOk, TError>(
 }
 
 
+export type Awaitable<T> = T | PromiseLike<T>
+
+
 export async function asyncFallible<TOk, TError>(
-    func: () => Result<TOk, TError> | Promise<Result<TOk, TError>>
+    func: () => Awaitable<Result<TOk, TError>>
 ): Promise<Result<TOk, TError>> {
     try {
         return await func()
