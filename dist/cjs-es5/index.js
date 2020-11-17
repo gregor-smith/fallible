@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mapError = exports.error = exports.ok = exports.asyncFallible = exports.fallible = exports.propagate = void 0;
+exports.tapError = exports.mapError = exports.error = exports.ok = exports.asyncFallible = exports.fallible = exports.propagate = exports.FallibleError = void 0;
 var tslib_1 = require("tslib");
 var FallibleError = /** @class */ (function () {
     function FallibleError(value) {
@@ -8,6 +8,7 @@ var FallibleError = /** @class */ (function () {
     }
     return FallibleError;
 }());
+exports.FallibleError = FallibleError;
 function propagate(fallible) {
     if (!fallible.ok) {
         throw new FallibleError(fallible.value);
@@ -62,4 +63,11 @@ function mapError(func) {
         : error(func(fallible.value)); };
 }
 exports.mapError = mapError;
+function tapError(func) {
+    return mapError(function (error) {
+        func(error);
+        return error;
+    });
+}
+exports.tapError = tapError;
 //# sourceMappingURL=index.js.map

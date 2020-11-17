@@ -67,3 +67,13 @@ export function mapError<TOk, TError, TNewError>(
         ? fallible
         : error(func(fallible.value))
 }
+
+
+export function tapError<TOk, TError>(
+    func: (error: TError) => void
+): (fallible: Result<TOk, TError>) => Result<TOk, TError> {
+    return mapError(error => {
+        func(error)
+        return error
+    })
+}

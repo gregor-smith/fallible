@@ -1,4 +1,4 @@
-class FallibleError {
+export class FallibleError {
     constructor(value) {
         this.value = value;
     }
@@ -41,5 +41,11 @@ export function mapError(func) {
     return fallible => fallible.ok
         ? fallible
         : error(func(fallible.value));
+}
+export function tapError(func) {
+    return mapError(error => {
+        func(error);
+        return error;
+    });
 }
 //# sourceMappingURL=index.js.map

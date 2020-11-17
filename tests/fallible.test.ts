@@ -1,4 +1,4 @@
-import { fallible, error, ok, propagate, Result, asyncFallible, mapError } from '../src'
+import { fallible, error, ok, propagate, Result, asyncFallible, mapError, tapError } from '../src'
 
 
 
@@ -102,12 +102,36 @@ describe('asyncFallible', () => {
 })
 
 
-test('mapError', () => {
-    const result = fallible<string, 'test'>(() => {
-        propagate(
-            mapError(() => 'test' as const)(parseJSON('{'))
-        )
-        throw 'This should be unreachable'
+describe('mapError', () => {
+    const mapper = mapError<string, any, 'test'>(() => 'test')
+
+    test('maps error', () => {
+        const result = mapper(error('hello'))
+        expect(result).toEqual<typeof result>(error('test'))
     })
-    expect(result).toEqual<typeof result>(error('test'))
+
+    test('does not map ok', () => {
+        const result = mapper(ok('hello'))
+        expect(result).toEqual<typeof result>(ok('hello'))
+    })
+})
+
+
+describe('tapError', () => {
+    const mock = jest.fn<void, [ string ]>()
+    afterEach(jest.clearAllMocks)
+    const tapper = tapError<string, string>(mock)
+
+    test('taps error', () => {
+        const result = tapper(error('hello'))
+        expect(result).toEqual<typeof result>(error('hello'))
+        expect(mock).toHaveBeenCalledTimes(1)
+        expect(mock).toHaveBeenCalledWith('hello')
+    })
+
+    test('does not tap ok', () => {
+        const result = tapper(ok('hello'))
+        expect(result).toEqual<typeof result>(ok('hello'))
+        expect(mock).not.toHaveBeenCalled()
+    })
 })

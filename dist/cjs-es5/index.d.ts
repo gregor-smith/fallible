@@ -1,3 +1,7 @@
+export declare class FallibleError<T> {
+    readonly value: T;
+    constructor(value: T);
+}
 export declare type Ok<T> = {
     ok: true;
     value: T;
@@ -13,3 +17,4 @@ export declare function asyncFallible<TOk, TError>(func: () => Result<TOk, TErro
 export declare function ok<T>(value: T): Ok<T>;
 export declare function error<T>(value: T): Error<T>;
 export declare function mapError<TOk, TError, TNewError>(func: (error: TError) => TNewError): (fallible: Result<TOk, TError>) => Result<TOk, TNewError>;
+export declare function tapError<TOk, TError>(func: (error: TError) => void): (fallible: Result<TOk, TError>) => Result<TOk, TError>;
