@@ -21,10 +21,12 @@ export function propagate<TOk, TError>(fallible: Result<TOk, TError>): TOk {
 
 
 export function fallible<TOk, TError>(
-    func: () => Result<TOk, TError>
+    func: (
+        propagate: <TReturn>(fallible: Result<TReturn, TError>) => TReturn
+    ) => Result<TOk, TError>
 ): Result<TOk, TError> {
     try {
-        return func()
+        return func(propagate)
     }
     catch (exception: unknown) {
         if (exception instanceof FallibleError) {
@@ -39,10 +41,12 @@ export type Awaitable<T> = T | PromiseLike<T>
 
 
 export async function asyncFallible<TOk, TError>(
-    func: () => Awaitable<Result<TOk, TError>>
+    func: (
+        propagate: <TReturn>(fallible: Result<TReturn, TError>) => TReturn
+    ) => Awaitable<Result<TOk, TError>>
 ): Promise<Result<TOk, TError>> {
     try {
-        return await func()
+        return await func(propagate)
     }
     catch (exception: unknown) {
         if (exception instanceof FallibleError) {

@@ -11,7 +11,7 @@ export function propagate(fallible) {
 }
 export function fallible(func) {
     try {
-        return func();
+        return func(propagate);
     }
     catch (exception) {
         if (exception instanceof FallibleError) {
@@ -22,7 +22,7 @@ export function fallible(func) {
 }
 export async function asyncFallible(func) {
     try {
-        return await func();
+        return await func(propagate);
     }
     catch (exception) {
         if (exception instanceof FallibleError) {

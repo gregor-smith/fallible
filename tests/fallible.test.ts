@@ -1,4 +1,4 @@
-import { fallible, error, ok, propagate, Result, asyncFallible, mapError, tapError } from '../src'
+import { fallible, error, ok, Result, asyncFallible, mapError, tapError } from '../src'
 
 
 
@@ -32,7 +32,7 @@ type ParseError = ParseJSONError | ParseIntegerError
 
 describe('fallible', () => {
     test('ok chain', () => {
-        const result = fallible<number, ParseError>(() => {
+        const result = fallible<number, ParseError>(propagate => {
             const json = propagate(parseJSON<string>('"1"'))
             expect(json).toBe('1')
             const number = propagate(parseInteger(json))
@@ -43,7 +43,7 @@ describe('fallible', () => {
     })
 
     test('first error propagates', () => {
-        const result = fallible<number, ParseError>(() => {
+        const result = fallible<number, ParseError>(propagate => {
             propagate(parseJSON<string>('{'))
             throw 'This should be unreachable'
         })
@@ -51,7 +51,7 @@ describe('fallible', () => {
     })
 
     test('second error propagates', () => {
-        const result = fallible<number, ParseError>(() => {
+        const result = fallible<number, ParseError>(propagate => {
             const json = propagate(parseJSON<string>('"a"'))
             propagate(parseInteger(json))
             throw 'This should be unreachable'
@@ -73,7 +73,7 @@ function asyncParseInteger(value: string): Promise<Result<number, ParseIntegerEr
 
 describe('asyncFallible', () => {
     test('ok chain', async () => {
-        const result = await asyncFallible<number, ParseError>(async () => {
+        const result = await asyncFallible<number, ParseError>(async propagate => {
             const json = propagate(await asyncParseJSON<string>('"1"'))
             expect(json).toBe('1')
             const number = propagate(await asyncParseInteger(json))
@@ -84,7 +84,7 @@ describe('asyncFallible', () => {
     })
 
     test('first error propagates', async () => {
-        const result = await asyncFallible<number, ParseError>(async () => {
+        const result = await asyncFallible<number, ParseError>(async propagate => {
             propagate(await asyncParseJSON<string>('{'))
             throw 'This should be unreachable'
         })
@@ -92,7 +92,7 @@ describe('asyncFallible', () => {
     })
 
     test('second error propagates', async () => {
-        const result = await asyncFallible<number, ParseError>(async () => {
+        const result = await asyncFallible<number, ParseError>(async propagate => {
             const json = propagate(await asyncParseJSON<string>('"a"'))
             propagate(await asyncParseInteger(json))
             throw 'This should be unreachable'

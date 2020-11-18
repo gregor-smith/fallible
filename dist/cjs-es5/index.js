@@ -18,7 +18,7 @@ function propagate(fallible) {
 exports.propagate = propagate;
 function fallible(func) {
     try {
-        return func();
+        return func(propagate);
     }
     catch (exception) {
         if (exception instanceof FallibleError) {
@@ -35,7 +35,7 @@ function asyncFallible(func) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, func()];
+                    return [4 /*yield*/, func(propagate)];
                 case 1: return [2 /*return*/, _a.sent()];
                 case 2:
                     exception_1 = _a.sent();
