@@ -15,7 +15,9 @@ export declare function propagate<TOk, TError>(fallible: Result<TOk, TError>): T
 export declare function fallible<TOk, TError>(func: (propagate: <TReturn>(fallible: Result<TReturn, TError>) => TReturn) => Result<TOk, TError>): Result<TOk, TError>;
 export declare type Awaitable<T> = T | PromiseLike<T>;
 export declare function asyncFallible<TOk, TError>(func: (propagate: <TReturn>(fallible: Result<TReturn, TError>) => TReturn) => Awaitable<Result<TOk, TError>>): Promise<Result<TOk, TError>>;
+export declare function ok(): Ok<void>;
 export declare function ok<T>(value: T): Ok<T>;
+export declare function error(): Error<void>;
 export declare function error<T>(value: T): Error<T>;
 export declare function mapError<TOk, TError, TNewError>(func: (error: TError) => TNewError): (fallible: Result<TOk, TError>) => Result<TOk, TNewError>;
 export declare function tapError<TOk, TError>(func: (error: TError) => void): (fallible: Result<TOk, TError>) => Result<TOk, TError>;
