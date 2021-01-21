@@ -4,6 +4,7 @@
   "type": "module",
   "main": "./dist/index.js",
   "exports": "./dist/index.js",
+  "sideEffects": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gregor-smith/fallible.git"
