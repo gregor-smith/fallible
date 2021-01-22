@@ -1,7 +1,6 @@
 import { fallible, error, ok, Result, asyncFallible, mapError, tapError } from '../src'
 
 
-
 type ParseJSONError = 'InvalidJSON'
 
 function parseJSON<T = unknown>(json: string): Result<T, ParseJSONError> {

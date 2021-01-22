@@ -12,17 +12,17 @@ export type Error<T> = { ok: false, value: T }
 export type Result<TOk, TError> = Ok<TOk> | Error<TError>
 
 
-export function propagate<TOk, TError>(fallible: Result<TOk, TError>): TOk {
-    if (!fallible.ok) {
-        throw new FallibleError(fallible.value)
+export function propagate<TOk, TError>(result: Result<TOk, TError>): TOk {
+    if (!result.ok) {
+        throw new FallibleError(result.value)
     }
-    return fallible.value
+    return result.value
 }
 
 
 export function fallible<TOk, TError>(
     func: (
-        propagate: <TReturn>(fallible: Result<TReturn, TError>) => TReturn
+        propagate: <TReturn>(result: Result<TReturn, TError>) => TReturn
     ) => Result<TOk, TError>
 ): Result<TOk, TError> {
     try {
@@ -42,7 +42,7 @@ export type Awaitable<T> = T | PromiseLike<T>
 
 export async function asyncFallible<TOk, TError>(
     func: (
-        propagate: <TReturn>(fallible: Result<TReturn, TError>) => TReturn
+        propagate: <TReturn>(result: Result<TReturn, TError>) => TReturn
     ) => Awaitable<Result<TOk, TError>>
 ): Promise<Result<TOk, TError>> {
     try {
@@ -73,16 +73,16 @@ export function error(value?: any) {
 
 export function mapError<TOk, TError, TNewError>(
     func: (error: TError) => TNewError
-): (fallible: Result<TOk, TError>) => Result<TOk, TNewError> {
-    return fallible => fallible.ok
-        ? fallible
-        : error(func(fallible.value))
+): (result: Result<TOk, TError>) => Result<TOk, TNewError> {
+    return result => result.ok
+        ? result
+        : error(func(result.value))
 }
 
 
 export function tapError<TOk, TError>(
     func: (error: TError) => void
-): (fallible: Result<TOk, TError>) => Result<TOk, TError> {
+): (result: Result<TOk, TError>) => Result<TOk, TError> {
     return mapError(error => {
         func(error)
         return error
