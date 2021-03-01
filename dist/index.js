@@ -3,11 +3,11 @@ export class FallibleError {
         this.value = value;
     }
 }
-export function propagate(fallible) {
-    if (!fallible.ok) {
-        throw new FallibleError(fallible.value);
+export function propagate(result) {
+    if (!result.ok) {
+        throw new FallibleError(result.value);
     }
-    return fallible.value;
+    return result.value;
 }
 export function fallible(func) {
     try {
@@ -38,9 +38,9 @@ export function error(value) {
     return { ok: false, value };
 }
 export function mapError(func) {
-    return fallible => fallible.ok
-        ? fallible
-        : error(func(fallible.value));
+    return result => result.ok
+        ? result
+        : error(func(result.value));
 }
 export function tapError(func) {
     return mapError(error => {

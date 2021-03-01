@@ -1,4 +1,12 @@
-import { fallible, error, ok, Result, asyncFallible, mapError, tapError } from '../src'
+import {
+    fallible,
+    error,
+    ok,
+    Result,
+    asyncFallible,
+    mapError,
+    tapError
+} from '../src/index.js'
 
 
 type ParseJSONError = 'InvalidJSON'
@@ -9,7 +17,7 @@ function parseJSON<T = unknown>(json: string): Result<T, ParseJSONError> {
         value = JSON.parse(json)
     }
     catch {
-        return error('InvalidJSON')
+        return error('InvalidJSON' as const)
     }
     return ok(value)
 }
@@ -20,7 +28,7 @@ type ParseIntegerError = 'NotInteger'
 function parseInteger(value: string): Result<number, ParseIntegerError> {
     const number = Number(value)
     if (!Number.isSafeInteger(number)) {
-        return error('NotInteger')
+        return error('NotInteger' as const)
     }
     return ok(number)
 }
@@ -46,7 +54,7 @@ describe('fallible', () => {
             propagate(parseJSON<string>('{'))
             throw 'This should be unreachable'
         })
-        expect(result).toEqual<typeof result>(error('InvalidJSON'))
+        expect(result).toEqual<typeof result>(error('InvalidJSON' as const))
     })
 
     test('second error propagates', () => {
@@ -55,7 +63,7 @@ describe('fallible', () => {
             propagate(parseInteger(json))
             throw 'This should be unreachable'
         })
-        expect(result).toEqual<typeof result>(error('NotInteger'))
+        expect(result).toEqual<typeof result>(error('NotInteger' as const))
     })
 })
 
@@ -87,7 +95,7 @@ describe('asyncFallible', () => {
             propagate(await asyncParseJSON<string>('{'))
             throw 'This should be unreachable'
         })
-        expect(result).toEqual<typeof result>(error('InvalidJSON'))
+        expect(result).toEqual<typeof result>(error('InvalidJSON' as const))
     })
 
     test('second error propagates', async () => {
@@ -96,7 +104,7 @@ describe('asyncFallible', () => {
             propagate(await asyncParseInteger(json))
             throw 'This should be unreachable'
         })
-        expect(result).toEqual<typeof result>(error('NotInteger'))
+        expect(result).toEqual<typeof result>(error('NotInteger' as const))
     })
 })
 
@@ -106,7 +114,7 @@ describe('mapError', () => {
 
     test('maps error', () => {
         const result = mapper(error('hello'))
-        expect(result).toEqual<typeof result>(error('test'))
+        expect(result).toEqual<typeof result>(error('test' as const))
     })
 
     test('does not map ok', () => {
