@@ -48,4 +48,4 @@ export function tapError(func) {
         return error;
     });
 }
-//# sourceMappingURL=index.js.map
+//# sourceMappingURL=fallible.js.map

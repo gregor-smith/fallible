@@ -2,8 +2,8 @@
   "name": "fallible",
   "version": "0.1.0",
   "type": "module",
-  "main": "./dist/index.js",
-  "exports": "./dist/index.js",
+  "main": "./dist/fallible.js",
+  "exports": "./dist/fallible.js",
   "sideEffects": false,
   "repository": {
     "type": "git",

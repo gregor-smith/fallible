@@ -6,7 +6,7 @@ import {
     asyncFallible,
     mapError,
     tapError
-} from '../src/index.js'
+} from './fallible.js'
 
 
 type ParseJSONError = 'InvalidJSON'
