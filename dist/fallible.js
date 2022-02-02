@@ -48,16 +48,21 @@ export function tapError(func) {
         return error;
     });
 }
-function dummyGuard(_value) {
-    return true;
-}
 function guardOrThrow(exception, guard) {
     if (!guard(exception)) {
         throw exception;
     }
     return error(exception);
 }
-export function wrapException(func, exceptionGuard = dummyGuard) {
+export function catchAnyException(func) {
+    try {
+        return ok(func());
+    }
+    catch (exception) {
+        return error(exception);
+    }
+}
+export function catchGuardedException(func, exceptionGuard) {
     try {
         return ok(func());
     }
@@ -68,10 +73,18 @@ export function wrapException(func, exceptionGuard = dummyGuard) {
 function instanceOfGuard(type) {
     return (value) => value instanceof type;
 }
-export function wrapExceptionByType(func, exceptionType) {
-    return wrapException(func, instanceOfGuard(exceptionType));
+export function catchExceptionByType(func, exceptionType) {
+    return catchGuardedException(func, instanceOfGuard(exceptionType));
 }
-export async function asyncWrapException(func, exceptionGuard = dummyGuard) {
+export async function asyncCatchAnyException(func) {
+    try {
+        return ok(await func());
+    }
+    catch (exception) {
+        return error(exception);
+    }
+}
+export async function asyncCatchGuardedException(func, exceptionGuard) {
     try {
         return ok(await func());
     }
@@ -79,7 +92,25 @@ export async function asyncWrapException(func, exceptionGuard = dummyGuard) {
         return guardOrThrow(exception, exceptionGuard);
     }
 }
+export function asyncCatchExceptionByType(func, exceptionType) {
+    return asyncCatchGuardedException(func, instanceOfGuard(exceptionType));
+}
+export function wrapAnyException(func) {
+    return (...args) => catchAnyException(() => func(...args));
+}
+export function wrapGuardedException(func, exceptionGuard) {
+    return (...args) => catchGuardedException(() => func(...args), exceptionGuard);
+}
+export function wrapExceptionByType(func, exceptionType) {
+    return (...args) => catchExceptionByType(() => func(...args), exceptionType);
+}
+export function asyncWrapAnyException(func) {
+    return (...args) => asyncCatchAnyException(() => func(...args));
+}
+export function asyncWrapGuardedException(func, exceptionGuard) {
+    return (...args) => asyncCatchGuardedException(() => func(...args), exceptionGuard);
+}
 export function asyncWrapExceptionByType(func, exceptionType) {
-    return asyncWrapException(func, instanceOfGuard(exceptionType));
+    return (...args) => asyncCatchExceptionByType(() => func(...args), exceptionType);
 }
 //# sourceMappingURL=fallible.js.map

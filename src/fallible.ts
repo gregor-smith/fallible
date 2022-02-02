@@ -88,11 +88,6 @@ export function tapError<TOk, TError>(
 }
 
 
-function dummyGuard(_value: unknown): _value is unknown {
-    return true
-}
-
-
 function guardOrThrow<T>(
     exception: unknown,
     guard: (exception: unknown) => exception is T
@@ -104,17 +99,22 @@ function guardOrThrow<T>(
 }
 
 
-export function wrapException<TOk>(
+export function catchAnyException<TOk>(
     func: () => TOk
-): Result<TOk, unknown>
-export function wrapException<TOk, TError>(
+): Result<TOk, unknown> {
+    try {
+        return ok(func())
+    }
+    catch (exception: unknown) {
+        return error(exception)
+    }
+}
+
+
+export function catchGuardedException<TOk, TError>(
     func: () => TOk,
     exceptionGuard: (exception: unknown) => exception is TError
-): Result<TOk, TError>
-export function wrapException(
-    func: () => any,
-    exceptionGuard = dummyGuard
-) {
+): Result<TOk, TError> {
     try {
         return ok(func())
     }
@@ -129,28 +129,33 @@ function instanceOfGuard<T>(type: new (...args: any[]) => T): (value: unknown) =
 }
 
 
-export function wrapExceptionByType<TOk, TError>(
+export function catchExceptionByType<TOk, TError>(
     func: () => TOk,
     exceptionType: new (...args: any[]) => TError
 ): Result<TOk, TError> {
-    return wrapException(
+    return catchGuardedException(
         func,
         instanceOfGuard(exceptionType)
     )
 }
 
 
-export function asyncWrapException<TOk>(
+export async function asyncCatchAnyException<TOk>(
     func: () => Awaitable<TOk>
-): Promise<Result<TOk, unknown>>
-export function asyncWrapException<TOk, TError>(
+): Promise<Result<TOk, unknown>> {
+    try {
+        return ok(await func())
+    }
+    catch (exception: unknown) {
+        return error(exception)
+    }
+}
+
+
+export async function asyncCatchGuardedException<TOk, TError>(
     func: () => Awaitable<TOk>,
     exceptionGuard: (exception: unknown) => exception is TError
-): Promise<Result<TOk, TError>>
-export async function asyncWrapException(
-    func: () => any,
-    exceptionGuard = dummyGuard
-) {
+): Promise<Result<TOk, TError>> {
     try {
         return ok(await func())
     }
@@ -160,12 +165,58 @@ export async function asyncWrapException(
 }
 
 
-export function asyncWrapExceptionByType<TOk, TError>(
+export function asyncCatchExceptionByType<TOk, TError>(
     func: () => Awaitable<TOk>,
     exceptionType: new (...args: any[]) => TError
 ): Promise<Result<TOk, TError>> {
-    return asyncWrapException(
+    return asyncCatchGuardedException(
         func,
         instanceOfGuard(exceptionType)
     )
+}
+
+
+export function wrapAnyException<TArgs extends any[], TReturn>(
+    func: (...args: TArgs) => TReturn
+): (...args: TArgs) => Result<TReturn, unknown> {
+    return (...args) => catchAnyException(() => func(...args))
+}
+
+
+export function wrapGuardedException<TArgs extends any[], TReturn, TError>(
+    func: (...args: TArgs) => TReturn,
+    exceptionGuard: (exception: unknown) => exception is TError
+): (...args: TArgs) => Result<TReturn, TError> {
+    return (...args) => catchGuardedException(() => func(...args), exceptionGuard)
+}
+
+
+export function wrapExceptionByType<TArgs extends any[], TReturn, TError>(
+    func: (...args: TArgs) => TReturn,
+    exceptionType: new (...args: any[]) => TError
+): (...args: TArgs) => Result<TReturn, TError> {
+    return (...args) => catchExceptionByType(() => func(...args), exceptionType)
+}
+
+
+export function asyncWrapAnyException<TArgs extends any[], TReturn>(
+    func: (...args: TArgs) => Awaitable<TReturn>
+): (...args: TArgs) => Promise<Result<TReturn, unknown>> {
+    return (...args) => asyncCatchAnyException(() => func(...args))
+}
+
+
+export function asyncWrapGuardedException<TArgs extends any[], TReturn, TError>(
+    func: (...args: TArgs) => Awaitable<TReturn>,
+    exceptionGuard: (exception: unknown) => exception is TError
+): (...args: TArgs) => Promise<Result<TReturn, TError>> {
+    return (...args) => asyncCatchGuardedException(() => func(...args), exceptionGuard)
+}
+
+
+export function asyncWrapExceptionByType<TArgs extends any[], TReturn, TError>(
+    func: (...args: TArgs) => Awaitable<TReturn>,
+    exceptionType: new (...args: any[]) => TError
+): (...args: TArgs) => Promise<Result<TReturn, TError>> {
+    return (...args) => asyncCatchExceptionByType(() => func(...args), exceptionType)
 }
