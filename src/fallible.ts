@@ -57,14 +57,14 @@ export async function asyncFallible<TOk, TError>(
 }
 
 
-export function ok(): Ok<void>
+export function ok<T extends void>(): Ok<T>
 export function ok<T>(value: T): Ok<T>
 export function ok(value?: any) {
     return { ok: true, value }
 }
 
 
-export function error(): Error<void>
+export function error<T extends void>(): Error<T>
 export function error<T>(value: T): Error<T>
 export function error(value?: any) {
     return { ok: false, value }
