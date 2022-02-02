@@ -1,9 +1,7 @@
 class FallibleError<T> {
-    public readonly value: T
-
-    public constructor(value: T) {
-        this.value = value
-    }
+    public constructor(
+        public readonly value: T
+    ) {}
 }
 
 
@@ -90,8 +88,19 @@ export function tapError<TOk, TError>(
 }
 
 
-function dummyGuard(_: unknown): boolean {
+function dummyGuard(_value: unknown): _value is unknown {
     return true
+}
+
+
+function guardOrThrow<T>(
+    exception: unknown,
+    guard: (exception: unknown) => exception is T
+): Error<T> {
+    if (!guard(exception)) {
+        throw exception
+    }
+    return error(exception)
 }
 
 
@@ -110,11 +119,13 @@ export function wrapException(
         return ok(func())
     }
     catch (exception: unknown) {
-        if (!exceptionGuard(exception)) {
-            throw exception
-        }
-        return error(exception)
+        return guardOrThrow(exception, exceptionGuard)
     }
+}
+
+
+function instanceOfGuard<T>(type: new (...args: any[]) => T): (value: unknown) => value is T {
+    return (value): value is T => value instanceof type
 }
 
 
@@ -124,7 +135,7 @@ export function wrapExceptionByType<TOk, TError>(
 ): Result<TOk, TError> {
     return wrapException(
         func,
-        (error): error is TError => error instanceof exceptionType
+        instanceOfGuard(exceptionType)
     )
 }
 
@@ -144,10 +155,7 @@ export async function asyncWrapException(
         return ok(await func())
     }
     catch (exception: unknown) {
-        if (!exceptionGuard(exception)) {
-            throw exception
-        }
-        return error(exception)
+        return guardOrThrow(exception, exceptionGuard)
     }
 }
 
@@ -158,6 +166,6 @@ export function asyncWrapExceptionByType<TOk, TError>(
 ): Promise<Result<TOk, TError>> {
     return asyncWrapException(
         func,
-        (error): error is TError => error instanceof exceptionType
+        instanceOfGuard(exceptionType)
     )
 }

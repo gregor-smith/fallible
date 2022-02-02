@@ -48,35 +48,38 @@ export function tapError(func) {
         return error;
     });
 }
-function dummyGuard(_) {
+function dummyGuard(_value) {
     return true;
+}
+function guardOrThrow(exception, guard) {
+    if (!guard(exception)) {
+        throw exception;
+    }
+    return error(exception);
 }
 export function wrapException(func, exceptionGuard = dummyGuard) {
     try {
         return ok(func());
     }
     catch (exception) {
-        if (!exceptionGuard(exception)) {
-            throw exception;
-        }
-        return error(exception);
+        return guardOrThrow(exception, exceptionGuard);
     }
 }
+function instanceOfGuard(type) {
+    return (value) => value instanceof type;
+}
 export function wrapExceptionByType(func, exceptionType) {
-    return wrapException(func, (error) => error instanceof exceptionType);
+    return wrapException(func, instanceOfGuard(exceptionType));
 }
 export async function asyncWrapException(func, exceptionGuard = dummyGuard) {
     try {
         return ok(await func());
     }
     catch (exception) {
-        if (!exceptionGuard(exception)) {
-            throw exception;
-        }
-        return error(exception);
+        return guardOrThrow(exception, exceptionGuard);
     }
 }
 export function asyncWrapExceptionByType(func, exceptionType) {
-    return asyncWrapException(func, (error) => error instanceof exceptionType);
+    return asyncWrapException(func, instanceOfGuard(exceptionType));
 }
 //# sourceMappingURL=fallible.js.map
