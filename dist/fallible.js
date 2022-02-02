@@ -1,9 +1,9 @@
-export class FallibleError {
+class FallibleError {
     constructor(value) {
         this.value = value;
     }
 }
-export function propagate(result) {
+function propagate(result) {
     if (!result.ok) {
         throw new FallibleError(result.value);
     }
@@ -47,5 +47,36 @@ export function tapError(func) {
         func(error);
         return error;
     });
+}
+function dummyGuard(_) {
+    return true;
+}
+export function wrapException(func, exceptionGuard = dummyGuard) {
+    try {
+        return ok(func());
+    }
+    catch (exception) {
+        if (!exceptionGuard(exception)) {
+            throw exception;
+        }
+        return error(exception);
+    }
+}
+export function wrapExceptionByType(func, exceptionType) {
+    return wrapException(func, (error) => error instanceof exceptionType);
+}
+export async function asyncWrapException(func, exceptionGuard = dummyGuard) {
+    try {
+        return ok(await func());
+    }
+    catch (exception) {
+        if (!exceptionGuard(exception)) {
+            throw exception;
+        }
+        return error(exception);
+    }
+}
+export function asyncWrapExceptionByType(func, exceptionType) {
+    return asyncWrapException(func, (error) => error instanceof exceptionType);
 }
 //# sourceMappingURL=fallible.js.map

@@ -1,4 +1,4 @@
-export class FallibleError<T> {
+class FallibleError<T> {
     public readonly value: T
 
     public constructor(value: T) {
@@ -12,7 +12,7 @@ export type Error<T> = { ok: false, value: T }
 export type Result<TOk, TError> = Ok<TOk> | Error<TError>
 
 
-export function propagate<TOk, TError>(result: Result<TOk, TError>): TOk {
+function propagate<TOk, TError>(result: Result<TOk, TError>): TOk {
     if (!result.ok) {
         throw new FallibleError(result.value)
     }
@@ -87,4 +87,77 @@ export function tapError<TOk, TError>(
         func(error)
         return error
     })
+}
+
+
+function dummyGuard(_: unknown): boolean {
+    return true
+}
+
+
+export function wrapException<TOk>(
+    func: () => TOk
+): Result<TOk, unknown>
+export function wrapException<TOk, TError>(
+    func: () => TOk,
+    exceptionGuard: (exception: unknown) => exception is TError
+): Result<TOk, TError>
+export function wrapException(
+    func: () => any,
+    exceptionGuard = dummyGuard
+) {
+    try {
+        return ok(func())
+    }
+    catch (exception: unknown) {
+        if (!exceptionGuard(exception)) {
+            throw exception
+        }
+        return error(exception)
+    }
+}
+
+
+export function wrapExceptionByType<TOk, TError>(
+    func: () => TOk,
+    exceptionType: new (...args: any[]) => TError
+): Result<TOk, TError> {
+    return wrapException(
+        func,
+        (error): error is TError => error instanceof exceptionType
+    )
+}
+
+
+export function asyncWrapException<TOk>(
+    func: () => Awaitable<TOk>
+): Promise<Result<TOk, unknown>>
+export function asyncWrapException<TOk, TError>(
+    func: () => Awaitable<TOk>,
+    exceptionGuard: (exception: unknown) => exception is TError
+): Promise<Result<TOk, TError>>
+export async function asyncWrapException(
+    func: () => any,
+    exceptionGuard = dummyGuard
+) {
+    try {
+        return ok(await func())
+    }
+    catch (exception: unknown) {
+        if (!exceptionGuard(exception)) {
+            throw exception
+        }
+        return error(exception)
+    }
+}
+
+
+export function asyncWrapExceptionByType<TOk, TError>(
+    func: () => Awaitable<TOk>,
+    exceptionType: new (...args: any[]) => TError
+): Promise<Result<TOk, TError>> {
+    return asyncWrapException(
+        func,
+        (error): error is TError => error instanceof exceptionType
+    )
 }
