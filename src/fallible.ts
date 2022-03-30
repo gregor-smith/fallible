@@ -18,6 +18,12 @@ function propagate<TOk, TError>(result: Result<TOk, TError>): TOk {
 }
 
 
+/**
+ * Takes a function with a single function argument; when this `propagate`
+ * argument is passed a {@link Result}, the {@link Error} channel if present is
+ * immediately propagated and returned, otherwise the value of the {@link Ok}
+ * channel is returned and execution continues.
+ */
 export function fallible<TOk, TError>(
     func: (
         propagate: <TReturn>(result: Result<TReturn, TError>) => TReturn
@@ -35,9 +41,11 @@ export function fallible<TOk, TError>(
 }
 
 
+/** Any value that produces `T` when `await`ed */
 export type Awaitable<T> = T | PromiseLike<T>
 
 
+/** Like {@link fallible} but the inner function can return an {@link Awaitable} */
 export async function asyncFallible<TOk, TError>(
     func: (
         propagate: <TReturn>(result: Result<TReturn, TError>) => TReturn
@@ -69,6 +77,10 @@ export function error(value?: any) {
 }
 
 
+/**
+ * A higher order function; returns a function which when called with a
+ * {@link Result} will map the error channel if present to a new value.
+ */
 export function mapError<TOk, TError, TNewError>(
     func: (error: TError) => TNewError
 ): (result: Result<TOk, TError>) => Result<TOk, TNewError> {
@@ -78,6 +90,10 @@ export function mapError<TOk, TError, TNewError>(
 }
 
 
+/**
+ * A higher order function; returns a function which when called with a
+ * {@link Result} allows inspecting the error channel if present.
+ */
 export function tapError<TOk, TError>(
     func: (error: TError) => void
 ): (result: Result<TOk, TError>) => Result<TOk, TError> {
@@ -99,6 +115,10 @@ function guardOrThrow<T>(
 }
 
 
+/**
+ * Calls the given `func` and returns its value in an {@link Ok}; if an
+ * exception is thrown, it is returned in an {@link Error}.
+ */
 export function catchAnyException<TOk>(
     func: () => TOk
 ): Result<TOk, unknown> {
@@ -111,6 +131,11 @@ export function catchAnyException<TOk>(
 }
 
 
+/**
+ * Calls the given `func` and returns its value in an {@link Ok}; if an
+ * exception is thrown, it is returned in an {@link Error} if it matches the
+ * given `exceptionGuard`, otherwise it throws as usual.
+ */
 export function catchGuardedException<TOk, TError>(
     func: () => TOk,
     exceptionGuard: (exception: unknown) => exception is TError
@@ -129,6 +154,11 @@ function instanceOfGuard<T>(type: new (...args: any[]) => T): (value: unknown) =
 }
 
 
+/**
+ * Calls the given `func` and returns its value in an {@link Ok}; if an
+ * exception is thrown, it is returned in an {@link Error} if it matches the
+ * given `exceptionType`, otherwise it throws as usual.
+ */
 export function catchExceptionByType<TOk, TError>(
     func: () => TOk,
     exceptionType: new (...args: any[]) => TError
@@ -140,6 +170,7 @@ export function catchExceptionByType<TOk, TError>(
 }
 
 
+/** Like {@link catchAnyException}, except the `func` can return an {@link Awaitable} */
 export async function asyncCatchAnyException<TOk>(
     func: () => Awaitable<TOk>
 ): Promise<Result<TOk, unknown>> {
@@ -152,6 +183,7 @@ export async function asyncCatchAnyException<TOk>(
 }
 
 
+/** Like {@link catchGuardedException}, except the `func` can return an {@link Awaitable} */
 export async function asyncCatchGuardedException<TOk, TError>(
     func: () => Awaitable<TOk>,
     exceptionGuard: (exception: unknown) => exception is TError
@@ -165,6 +197,7 @@ export async function asyncCatchGuardedException<TOk, TError>(
 }
 
 
+/** Like {@link catchExceptionByType}, except the `func` can return an {@link Awaitable} */
 export function asyncCatchExceptionByType<TOk, TError>(
     func: () => Awaitable<TOk>,
     exceptionType: new (...args: any[]) => TError
@@ -176,6 +209,11 @@ export function asyncCatchExceptionByType<TOk, TError>(
 }
 
 
+/**
+ * Wraps the given `func` and returns a new function, which when called will
+ * return the original return value in an {@link Ok}; if an exception is
+ * thrown, it is returned in an {@link Error}.
+ */
 export function wrapAnyException<TArgs extends any[], TReturn>(
     func: (...args: TArgs) => TReturn
 ): (...args: TArgs) => Result<TReturn, unknown> {
@@ -183,6 +221,12 @@ export function wrapAnyException<TArgs extends any[], TReturn>(
 }
 
 
+/**
+ * Wraps the given `func` and returns a new function, which when called will
+ * return the original return value in an {@link Ok}; if an exception is
+ * thrown, it is returned in an {@link Error} if it matches the given
+ * `exceptionGuard`, otherwise it throws as usual.
+ */
 export function wrapGuardedException<TArgs extends any[], TReturn, TError>(
     func: (...args: TArgs) => TReturn,
     exceptionGuard: (exception: unknown) => exception is TError
@@ -191,6 +235,12 @@ export function wrapGuardedException<TArgs extends any[], TReturn, TError>(
 }
 
 
+/**
+ * Wraps the given `func` and returns a new function, which when called will
+ * return the original return value in an {@link Ok}; if an exception is
+ * thrown, it is returned in an {@link Error} if it matches the given
+ * `exceptionType`, otherwise it throws as usual.
+ */
 export function wrapExceptionByType<TArgs extends any[], TReturn, TError>(
     func: (...args: TArgs) => TReturn,
     exceptionType: new (...args: any[]) => TError
@@ -199,6 +249,7 @@ export function wrapExceptionByType<TArgs extends any[], TReturn, TError>(
 }
 
 
+/** Like {@link wrapAnyException}, except the `func` can return an {@link Awaitable} */
 export function asyncWrapAnyException<TArgs extends any[], TReturn>(
     func: (...args: TArgs) => Awaitable<TReturn>
 ): (...args: TArgs) => Promise<Result<TReturn, unknown>> {
@@ -206,6 +257,7 @@ export function asyncWrapAnyException<TArgs extends any[], TReturn>(
 }
 
 
+/** Like {@link wrapGuardedException}, except the `func` can return an {@link Awaitable} */
 export function asyncWrapGuardedException<TArgs extends any[], TReturn, TError>(
     func: (...args: TArgs) => Awaitable<TReturn>,
     exceptionGuard: (exception: unknown) => exception is TError
@@ -214,6 +266,7 @@ export function asyncWrapGuardedException<TArgs extends any[], TReturn, TError>(
 }
 
 
+/** Like {@link wrapExceptionByType}, except the `func` can return an {@link Awaitable} */
 export function asyncWrapExceptionByType<TArgs extends any[], TReturn, TError>(
     func: (...args: TArgs) => Awaitable<TReturn>,
     exceptionType: new (...args: any[]) => TError

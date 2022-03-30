@@ -48,9 +48,9 @@ function fetchAndValidateJSON<T>(
     validate: (value: unknown) => Result<T, ValidateJSONError>
 ) {
     return asyncFallible<T, FetchJSONError | ValidateJSONError>(async propagate => {
-        // If fetchJSON returns an Error<T>, execution stops here and the error
-        // is immediately returned. If it returns an Ok<T>, its value is
-        // unwrapped and execution continues.
+        // If fetchJSON returns an Error, execution stops here and the error is
+        // immediately returned. If it returns an Ok, its value is unwrapped
+        // and execution continues.
         const body = propagate(await fetchJSON(url))
         // fallible/asyncFallible return a Result
         return validate(body)
@@ -90,7 +90,7 @@ fallible<number, string>(propagate => {
 })
 ```
 
-`tapError` can be used to inspect the error value of a `Result` without modifying it.
+`tapError` can be used to inspect the error value of a `Result` without transforming it.
 
 ```typescript
 declare const getExampleResult(): Result<void, string>
@@ -105,7 +105,7 @@ fallible<number, string>(propagate => {
 })
 ```
 
-A number of higher order functions are provided that ease working with throwing functions by wrapping them to return `Result`s instead. All of these functions also have equivalents for `async` functions:
+A number of higher order functions are provided that ease working with functions that can throw by wrapping them to return `Result`s instead. All of these functions also have `async` equivalents:
 
 ```typescript
 class ExampleError {}
