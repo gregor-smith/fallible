@@ -4,7 +4,7 @@ A type-safe propagating error handling solution for TypeScript.
 ### Installation
 No NPM package for now, so you need to add this repository directly as a dependency:
 ```
-$ yarn add https://github.com/gregor-smith/fallible.git
+$ yarn add https://github.com/gregor-smith/fallible.git#v1.0.0
 ```
 
 ### Usage
