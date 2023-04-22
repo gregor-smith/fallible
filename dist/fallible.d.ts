@@ -1,12 +1,12 @@
-export declare type Ok<T> = {
+export type Ok<T> = {
     ok: true;
     value: T;
 };
-export declare type Error<T> = {
+export type Error<T> = {
     ok: false;
     value: T;
 };
-export declare type Result<TOk, TError> = Ok<TOk> | Error<TError>;
+export type Result<TOk, TError> = Ok<TOk> | Error<TError>;
 /**
  * Takes a function with a single function argument; when this `propagate`
  * argument is passed a {@link Result}, the {@link Error} channel if present is
@@ -15,7 +15,7 @@ export declare type Result<TOk, TError> = Ok<TOk> | Error<TError>;
  */
 export declare function fallible<TOk, TError>(func: (propagate: <TReturn>(result: Result<TReturn, TError>) => TReturn) => Result<TOk, TError>): Result<TOk, TError>;
 /** Any value that produces `T` when `await`ed */
-export declare type Awaitable<T> = T | PromiseLike<T>;
+export type Awaitable<T> = T | PromiseLike<T>;
 /** Like {@link fallible} but the inner function can return an {@link Awaitable} */
 export declare function asyncFallible<TOk, TError>(func: (propagate: <TReturn>(result: Result<TReturn, TError>) => TReturn) => Awaitable<Result<TOk, TError>>): Promise<Result<TOk, TError>>;
 export declare function ok<T extends void>(): Ok<T>;
